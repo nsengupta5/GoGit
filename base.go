@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -53,18 +54,22 @@ func WriteTree(targetDir ...string) (oid string) {
 		entries = append(entries, entry)
 	}
 
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].name < entries[j].name
+	})
+
 	formattedEntries := make([]string, 0, len(entries))
 	for _, n := range entries {
 		formattedEntries = append(formattedEntries, fmt.Sprintf("%s %s %s", n.dataType, n.oid, n.name))
 	}
-	tree := strings.Join(formattedEntries, "")
+	tree := strings.Join(formattedEntries, "\n")
 	return HashObject([]byte(tree), "tree")
 }
 
 func isIgnored(path string) bool {
 	files := strings.SplitSeq(path, "/")
 	for f := range files {
-		if f == ".gogit" {
+		if f == ".gogit" || f == ".git" {
 			return true
 		}
 	}
