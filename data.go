@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -20,21 +21,44 @@ func Init() {
 }
 
 // HashObject hashes file contents to a unique blob
-func HashObject(data []byte) {
+func HashObject(data []byte, typeArg ...string) {
+	dataType := "blob"
+	if len(typeArg) > 0 {
+		dataType = typeArg[0]
+	}
+
 	hash := sha256.New()
 	hash.Write(data)
 	byteHash := hash.Sum(nil)
 	stringHash := hex.EncodeToString(byteHash)
 
-	os.WriteFile(filepath.Join(GitDir, "objects", stringHash), data, 0444)
+	obj := []byte(dataType)
+	obj = append(obj, 0)
+	obj = append(obj, data...)
+
+	os.WriteFile(filepath.Join(GitDir, "objects", stringHash), obj, 0444)
 	fmt.Println(stringHash)
 }
 
 // GetObject returns the contents of a file based on its hash
-func GetObject(hash string) (data []byte) {
-	data, err := os.ReadFile(filepath.Join(GitDir, "objects", hash))
+func GetObject(hash string, expectedTypeArg ...string) []byte {
+	obj, err := os.ReadFile(filepath.Join(GitDir, "objects", hash))
 	if err != nil {
 		log.Fatal(err)
 	}
-	return
+
+	sepIndex := bytes.IndexByte(obj, 0)
+	var dataType, content []byte
+
+	dataType = obj[:sepIndex]
+	content = obj[sepIndex+1:]
+
+	if expectedTypeArg != nil {
+		expectedDataType := expectedTypeArg[0]
+		if hex.EncodeToString(dataType) != expectedDataType {
+			log.Fatal(fmt.Errorf("Types are incompatible"))
+		}
+	}
+
+	return content
 }

@@ -67,7 +67,7 @@ func hashObject(filepath string) {
 }
 
 func catFile(hashString string) {
-	data := GetObject(hashString)
+	data := GetObject(hashString, "")
 	_, err := os.Stdout.Write(data)
 	if err != nil {
 		log.Fatal(err)
