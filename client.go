@@ -43,9 +43,21 @@ func main() {
 		},
 	}
 
+	var writeTreeCommand = &cobra.Command{
+		Use:   "write-tree",
+		Short: "Writes the current working directory into object database",
+		Run: func(_ *cobra.Command, args []string) {
+			if len(args) > 1 {
+				log.Fatal(fmt.Errorf("Invalid number of arguments"))
+			}
+			writeTree(args[0])
+		},
+	}
+
 	rootCmd.AddCommand(initCommand)
 	rootCmd.AddCommand(hashObjectCommand)
 	rootCmd.AddCommand(catFileCommand)
+	rootCmd.AddCommand(writeTreeCommand)
 	rootCmd.Execute()
 }
 
@@ -63,7 +75,8 @@ func hashObject(filepath string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	HashObject(data)
+	oid := HashObject(data)
+	fmt.Println(oid)
 }
 
 func catFile(hashString string) {
@@ -72,4 +85,8 @@ func catFile(hashString string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func writeTree(path string) {
+	WriteTree()
 }

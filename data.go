@@ -21,7 +21,7 @@ func Init() {
 }
 
 // HashObject hashes file contents to a unique blob
-func HashObject(data []byte, typeArg ...string) {
+func HashObject(data []byte, typeArg ...string) (oid string) {
 	dataType := "blob"
 	if len(typeArg) > 0 {
 		dataType = typeArg[0]
@@ -30,14 +30,14 @@ func HashObject(data []byte, typeArg ...string) {
 	hash := sha256.New()
 	hash.Write(data)
 	byteHash := hash.Sum(nil)
-	stringHash := hex.EncodeToString(byteHash)
+	oid = hex.EncodeToString(byteHash)
 
 	obj := []byte(dataType)
 	obj = append(obj, 0)
 	obj = append(obj, data...)
 
-	os.WriteFile(filepath.Join(GitDir, "objects", stringHash), obj, 0444)
-	fmt.Println(stringHash)
+	os.WriteFile(filepath.Join(GitDir, "objects", oid), obj, 0444)
+	return
 }
 
 // GetObject returns the contents of a file based on its hash
