@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -21,33 +20,38 @@ func WriteTree(targetDir ...string) (oid string) {
 	if len(targetDir) > 0 {
 		directory = targetDir[0]
 	}
-	entries := make([]entry, 1)
+	entries := make([]entry, 0)
 
-	filepath.WalkDir(directory, func(s string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
+	dirEntries, err := os.ReadDir(directory)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, de := range dirEntries {
+
+		path := filepath.Join(directory, de.Name())
+		if isIgnored(path) {
+			continue
 		}
 
 		var dataType string
 		var oid string
-		if !isIgnored(s) {
-			if !d.IsDir() {
-				dataType = "blob"
-				data, err := os.ReadFile(s)
-				if err != nil {
-					log.Fatal(err)
-				}
-				oid = HashObject(data)
-			} else {
-				dataType = "tree"
-				oid = WriteTree(s)
-			}
 
-			entry := entry{dataType: dataType, oid: oid, name: s}
-			entries = append(entries, entry)
+		if !de.IsDir() {
+			dataType = "blob"
+			data, err := os.ReadFile(path)
+			if err != nil {
+				log.Fatal(err)
+			}
+			oid = HashObject(data)
+		} else {
+			dataType = "tree"
+			oid = WriteTree(path)
 		}
-		return nil
-	})
+
+		entry := entry{dataType: dataType, oid: oid, name: de.Name()}
+		entries = append(entries, entry)
+	}
 
 	formattedEntries := make([]string, 0, len(entries))
 	for _, n := range entries {

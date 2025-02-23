@@ -50,7 +50,7 @@ func main() {
 			if len(args) > 1 {
 				log.Fatal(fmt.Errorf("Invalid number of arguments"))
 			}
-			writeTree(args[0])
+			writeTree()
 		},
 	}
 
@@ -87,6 +87,6 @@ func catFile(hashString string) {
 	}
 }
 
-func writeTree(path string) {
+func writeTree() {
 	WriteTree()
 }
