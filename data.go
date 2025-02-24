@@ -53,7 +53,7 @@ func GetObject(hash string, expectedTypeArg ...string) []byte {
 	dataType = obj[:sepIndex]
 	content = obj[sepIndex+1:]
 
-	if expectedTypeArg != nil {
+	if len(expectedTypeArg) > 0 {
 		expectedDataType := expectedTypeArg[0]
 		if hex.EncodeToString(dataType) != expectedDataType {
 			log.Fatal(fmt.Errorf("Types are incompatible"))

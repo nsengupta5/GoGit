@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"log"
+	"maps"
 	"os"
 	"path/filepath"
 	"sort"
@@ -74,4 +76,71 @@ func isIgnored(path string) bool {
 		}
 	}
 	return false
+}
+
+func iterTreeEntries(oid string) ([]entry, error) {
+	if oid == "" {
+		return nil, nil
+	}
+
+	tree := hex.EncodeToString(GetObject(oid, "tree"))
+	treeEntry := strings.Split(tree, "\n")
+
+	var entries []entry
+	for _, entryLine := range treeEntry {
+		if entryLine == "" {
+			continue
+		}
+
+		parts := strings.SplitN(entryLine, " ", 3)
+		if len(parts) < 3 {
+			log.Fatal(fmt.Errorf("Not enough data for given object in the tree"))
+		}
+
+		entryObj := entry{dataType: parts[0], oid: parts[1], name: parts[2]}
+		entries = append(entries, entryObj)
+	}
+
+	return entries, nil
+}
+
+func getTree(oid string, basePathArg ...string) map[string]string {
+	result := make(map[string]string)
+	basePath := ""
+	if len(basePathArg) > 0 {
+		basePath = basePathArg[0]
+	}
+
+	treeEntries, _ := iterTreeEntries(oid)
+	for _, entry := range treeEntries {
+		if strings.Contains(entry.name, "/") {
+			log.Fatal("Invalid tree: path contains /")
+		}
+		if strings.Contains(entry.name, ".") || strings.Contains(entry.name, "..") {
+			log.Fatal("Invalid tree: path contains . or ..")
+		}
+		path := basePath + entry.name
+		if entry.dataType == "blob" {
+			result[path] = oid
+		} else if entry.dataType == "tree" {
+			subtree := getTree(oid, fmt.Sprintf("%s/", path))
+			maps.Copy(result, subtree)
+		} else {
+			log.Fatal(fmt.Sprintf("Unknown tree entry %s", entry.dataType))
+		}
+	}
+	return result
+}
+
+// ReadTree takes the OID of a tree and extracts the contents to the working directory
+func ReadTree(treeOid string, basePathArg ...string) {
+	basePath := "./"
+	if len(basePathArg) > 0 {
+		basePath = basePathArg[0]
+	}
+	treeMap := getTree(treeOid, basePath)
+	for path, oid := range treeMap {
+		os.MkdirAll(filepath.Dir(path), 0755)
+		os.WriteFile(path, GetObject(oid), 0444)
+	}
 }
