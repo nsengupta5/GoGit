@@ -100,7 +100,7 @@ func catFile(hashString string) {
 }
 
 func writeTree() {
-	WriteTree()
+	fmt.Println(WriteTree())
 }
 
 func readTree(treeOid string) {
