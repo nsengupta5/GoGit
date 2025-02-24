@@ -67,6 +67,20 @@ func WriteTree(targetDir ...string) (oid string) {
 	return HashObject([]byte(tree), "tree")
 }
 
+// ReadTree takes the OID of a tree and extracts the contents to the working directory
+func ReadTree(treeOid string, basePathArg ...string) {
+	emptyCurrentDirectory()
+	basePath := "./"
+	if len(basePathArg) > 0 {
+		basePath = basePathArg[0]
+	}
+	treeMap := getTree(treeOid, basePath)
+	for path, oid := range treeMap {
+		os.MkdirAll(filepath.Dir(path), 0755)
+		os.WriteFile(path, GetObject(oid), 0444)
+	}
+}
+
 func isIgnored(path string) bool {
 	files := strings.SplitSeq(path, "/")
 	for f := range files {
@@ -131,15 +145,21 @@ func getTree(oid string, basePathArg ...string) map[string]string {
 	return result
 }
 
-// ReadTree takes the OID of a tree and extracts the contents to the working directory
-func ReadTree(treeOid string, basePathArg ...string) {
-	basePath := "./"
-	if len(basePathArg) > 0 {
-		basePath = basePathArg[0]
+func emptyCurrentDirectory() {
+	dirEntries, err := os.ReadDir(".")
+	if err != nil {
+		log.Fatal(err)
 	}
-	treeMap := getTree(treeOid, basePath)
-	for path, oid := range treeMap {
-		os.MkdirAll(filepath.Dir(path), 0755)
-		os.WriteFile(path, GetObject(oid), 0444)
+
+	for _, de := range dirEntries {
+		path := filepath.Join(".", de.Name())
+		if isIgnored(path) {
+			continue
+		}
+
+		err = os.RemoveAll(de.Name())
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
