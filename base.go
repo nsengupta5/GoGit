@@ -81,6 +81,16 @@ func ReadTree(treeOid string, basePathArg ...string) {
 	}
 }
 
+// Commit commits the current state
+func Commit(message string) string {
+	var commitString string = WriteTree()
+	commitString += "\n"
+	commitString += fmt.Sprintf("%s\n", message)
+
+	return HashObject([]byte(commitString), "commit")
+
+}
+
 func isIgnored(path string) bool {
 	files := strings.SplitSeq(path, "/")
 	for f := range files {

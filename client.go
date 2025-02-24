@@ -26,7 +26,7 @@ func main() {
 		Short: "Hash the file contents of the given file",
 		Run: func(_ *cobra.Command, args []string) {
 			if len(args) > 1 {
-				log.Fatal(fmt.Errorf("Invalid number of arguments"))
+				log.Fatal("Invalid number of arguments")
 			}
 			hashObject(args[0])
 		},
@@ -37,7 +37,7 @@ func main() {
 		Short: "Prints the content of an object",
 		Run: func(_ *cobra.Command, args []string) {
 			if len(args) > 1 {
-				log.Fatal(fmt.Errorf("Invalid number of arguments"))
+				log.Fatal("Invalid number of arguments")
 			}
 			catFile(args[0])
 		},
@@ -48,7 +48,7 @@ func main() {
 		Short: "Writes the current working directory into object database",
 		Run: func(_ *cobra.Command, args []string) {
 			if len(args) > 1 {
-				log.Fatal(fmt.Errorf("Invalid number of arguments"))
+				log.Fatal("Invalid number of arguments")
 			}
 			writeTree()
 		},
@@ -59,17 +59,35 @@ func main() {
 		Short: "Reads the OID of a tree and writes the state to the current working directory",
 		Run: func(_ *cobra.Command, args []string) {
 			if len(args) > 1 {
-				log.Fatal(fmt.Errorf("Invalid number of arguments"))
+				log.Fatal("Invalid number of arguments")
 			}
 			readTree(args[0])
 		},
 	}
+
+	var commitMessage string
+	var commitCommand = &cobra.Command{
+		Use:   "commit",
+		Short: "Creates a new commit",
+		Run: func(_ *cobra.Command, args []string) {
+			if commitMessage == "" {
+				log.Fatal("Commit message is required. Use the -m flag to specify a commit message")
+			}
+
+			if len(args) > 1 {
+				log.Fatal("Invalid number of arguments")
+			}
+			commit(commitMessage)
+		},
+	}
+	commitCommand.Flags().StringVarP(&commitMessage, "message", "m", "", "commit message")
 
 	rootCmd.AddCommand(initCommand)
 	rootCmd.AddCommand(hashObjectCommand)
 	rootCmd.AddCommand(catFileCommand)
 	rootCmd.AddCommand(writeTreeCommand)
 	rootCmd.AddCommand(readTreeCommand)
+	rootCmd.AddCommand(commitCommand)
 	rootCmd.Execute()
 }
 
@@ -105,4 +123,8 @@ func writeTree() {
 
 func readTree(treeOid string) {
 	ReadTree(treeOid)
+}
+
+func commit(message string) {
+	fmt.Println(Commit(message))
 }
