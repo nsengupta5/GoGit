@@ -84,11 +84,22 @@ func ReadTree(treeOid string, basePathArg ...string) {
 // Commit commits the current state
 func Commit(message string) string {
 	var commitString string = WriteTree()
+
+	HEAD, err := GetHead()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if HEAD != "" {
+		commitString += fmt.Sprintf("parent %s\n", HEAD)
+	}
+
 	commitString += "\n"
 	commitString += fmt.Sprintf("%s\n", message)
 
-	return HashObject([]byte(commitString), "commit")
-
+	commitOid := HashObject([]byte(commitString), "commit")
+	SetHead(commitOid)
+	return commitOid
 }
 
 func isIgnored(path string) bool {
