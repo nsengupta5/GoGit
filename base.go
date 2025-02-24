@@ -120,7 +120,7 @@ func getTree(oid string, basePathArg ...string) map[string]string {
 		}
 		path := basePath + entry.name
 		if entry.dataType == "blob" {
-			result[path] = oid
+			result[path] = entry.oid
 		} else if entry.dataType == "tree" {
 			subtree := getTree(oid, fmt.Sprintf("%s/", path))
 			maps.Copy(result, subtree)
