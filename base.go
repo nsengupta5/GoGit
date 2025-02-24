@@ -16,6 +16,13 @@ type entry struct {
 	name     string
 }
 
+// CommitDetails Holds details of a commit
+type CommitDetails struct {
+	treeOid   string
+	parentOid string
+	message   string
+}
+
 // WriteTree Write the current working directory into the object store
 func WriteTree(targetDir ...string) (oid string) {
 	directory := "."
@@ -83,7 +90,7 @@ func ReadTree(treeOid string, basePathArg ...string) {
 
 // Commit commits the current state
 func Commit(message string) string {
-	var commitString string = WriteTree()
+	var commitString string = fmt.Sprintf("tree %s\n", WriteTree())
 
 	HEAD, err := GetHead()
 	if err != nil {
@@ -100,6 +107,15 @@ func Commit(message string) string {
 	commitOid := HashObject([]byte(commitString), "commit")
 	SetHead(commitOid)
 	return commitOid
+}
+
+// GetCommit Returns the commit details of a given commit OID
+func GetCommit(oid string) CommitDetails {
+	commit := string(GetObject(oid, "commit"))
+	commitLines := strings.Split(commit, "\n")
+	fmt.Println(commitLines)
+
+	return CommitDetails{}
 }
 
 func isIgnored(path string) bool {

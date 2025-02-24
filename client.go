@@ -82,12 +82,21 @@ func main() {
 	}
 	commitCommand.Flags().StringVarP(&commitMessage, "message", "m", "", "commit message")
 
+	var logCommand = &cobra.Command{
+		Use:   "log",
+		Short: "Display the logs of the commits",
+		Run: func(_ *cobra.Command, _ []string) {
+			goLog()
+		},
+	}
+
 	rootCmd.AddCommand(initCommand)
 	rootCmd.AddCommand(hashObjectCommand)
 	rootCmd.AddCommand(catFileCommand)
 	rootCmd.AddCommand(writeTreeCommand)
 	rootCmd.AddCommand(readTreeCommand)
 	rootCmd.AddCommand(commitCommand)
+	rootCmd.AddCommand(logCommand)
 	rootCmd.Execute()
 }
 
@@ -127,4 +136,21 @@ func readTree(treeOid string) {
 
 func commit(message string) {
 	fmt.Println(Commit(message))
+}
+
+func goLog() {
+	oid, err := GetHead()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for oid != "" {
+		commit := GetCommit(oid)
+
+		fmt.Printf("commit %s\n", commit.treeOid)
+		fmt.Println(Indent(commit.message, "    "))
+		fmt.Println()
+
+		oid = commit.parentOid
+	}
 }
