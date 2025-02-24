@@ -77,7 +77,7 @@ func ReadTree(treeOid string, basePathArg ...string) {
 	treeMap := getTree(treeOid, basePath)
 	for path, oid := range treeMap {
 		os.MkdirAll(filepath.Dir(path), 0755)
-		os.WriteFile(path, GetObject(oid), 0444)
+		os.WriteFile(path, GetObject(oid), 0644)
 	}
 }
 
