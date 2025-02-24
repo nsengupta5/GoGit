@@ -54,10 +54,22 @@ func main() {
 		},
 	}
 
+	var readTreeCommand = &cobra.Command{
+		Use:   "read-tree",
+		Short: "Reads the OID of a tree and writes the state to the current working directory",
+		Run: func(_ *cobra.Command, args []string) {
+			if len(args) > 1 {
+				log.Fatal(fmt.Errorf("Invalid number of arguments"))
+			}
+			readTree(args[0])
+		},
+	}
+
 	rootCmd.AddCommand(initCommand)
 	rootCmd.AddCommand(hashObjectCommand)
 	rootCmd.AddCommand(catFileCommand)
 	rootCmd.AddCommand(writeTreeCommand)
+	rootCmd.AddCommand(readTreeCommand)
 	rootCmd.Execute()
 }
 
@@ -89,4 +101,8 @@ func catFile(hashString string) {
 
 func writeTree() {
 	WriteTree()
+}
+
+func readTree(treeOid string) {
+	ReadTree(treeOid)
 }
