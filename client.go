@@ -147,9 +147,8 @@ func goLog() {
 	for oid != "" {
 		commit := GetCommit(oid)
 
-		fmt.Printf("commit %s\n", commit.treeOid)
-		fmt.Println(Indent(commit.message, "    "))
-		fmt.Println()
+		fmt.Printf("commit %s\n", oid)
+		fmt.Println(Indent(commit.message, "       "))
 
 		oid = commit.parentOid
 	}

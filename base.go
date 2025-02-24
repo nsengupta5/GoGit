@@ -111,11 +111,33 @@ func Commit(message string) string {
 
 // GetCommit Returns the commit details of a given commit OID
 func GetCommit(oid string) CommitDetails {
+	var parent, tree, message string
 	commit := string(GetObject(oid, "commit"))
 	commitLines := strings.Split(commit, "\n")
-	fmt.Println(commitLines)
+	for _, line := range commitLines {
+		if line == "" {
+			break
+		}
 
-	return CommitDetails{}
+		parts := strings.SplitN(line, " ", 2)
+		if len(parts) != 2 {
+			log.Fatal("Not enough parts to commit detail")
+		}
+
+		key, val := parts[0], parts[1]
+		switch key {
+		case "tree":
+			tree = val
+		case "parent":
+			parent = val
+		default:
+			log.Fatal(fmt.Sprintf("Unknown key in commit details: %s", key))
+		}
+	}
+
+	message = strings.Join(commitLines[len(commitLines)-2:], "\n")
+
+	return CommitDetails{treeOid: tree, parentOid: parent, message: message}
 }
 
 func isIgnored(path string) bool {
