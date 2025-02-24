@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/hex"
 	"fmt"
 	"log"
 	"maps"
@@ -83,7 +82,7 @@ func iterTreeEntries(oid string) ([]entry, error) {
 		return nil, nil
 	}
 
-	tree := hex.EncodeToString(GetObject(oid, "tree"))
+	tree := string(GetObject(oid, "tree"))
 	treeEntry := strings.Split(tree, "\n")
 
 	var entries []entry
@@ -116,7 +115,7 @@ func getTree(oid string, basePathArg ...string) map[string]string {
 		if strings.Contains(entry.name, "/") {
 			log.Fatal("Invalid tree: path contains /")
 		}
-		if strings.Contains(entry.name, ".") || strings.Contains(entry.name, "..") {
+		if strings.Contains(entry.name, "./") || strings.Contains(entry.name, "../") {
 			log.Fatal("Invalid tree: path contains . or ..")
 		}
 		path := basePath + entry.name

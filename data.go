@@ -55,7 +55,7 @@ func GetObject(hash string, expectedTypeArg ...string) []byte {
 
 	if len(expectedTypeArg) > 0 {
 		expectedDataType := expectedTypeArg[0]
-		if hex.EncodeToString(dataType) != expectedDataType {
+		if string(dataType) != expectedDataType {
 			log.Fatal(fmt.Errorf("Types are incompatible"))
 		}
 	}
