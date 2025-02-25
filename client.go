@@ -120,6 +120,7 @@ func main() {
 	rootCmd.AddCommand(commitCommand)
 	rootCmd.AddCommand(logCommand)
 	rootCmd.AddCommand(checkoutCommand)
+	rootCmd.AddCommand(tagCommand)
 	rootCmd.Execute()
 }
 

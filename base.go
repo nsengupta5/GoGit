@@ -105,7 +105,7 @@ func Commit(message string) string {
 	commitString += fmt.Sprintf("%s\n", message)
 
 	commitOid := HashObject([]byte(commitString), "commit")
-	SetHead(commitOid)
+	UpdateRef("HEAD", commitOid)
 	return commitOid
 }
 
