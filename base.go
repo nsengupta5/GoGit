@@ -140,6 +140,13 @@ func GetCommit(oid string) CommitDetails {
 	return CommitDetails{treeOid: tree, parentOid: parent, message: message}
 }
 
+// Checkout Check out a specified commit
+func Checkout(oid string) {
+	commit := GetCommit(oid)
+	ReadTree(commit.treeOid)
+	SetHead(oid)
+}
+
 func isIgnored(path string) bool {
 	files := strings.SplitSeq(path, "/")
 	for f := range files {

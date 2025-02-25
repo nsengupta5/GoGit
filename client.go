@@ -90,6 +90,17 @@ func main() {
 		},
 	}
 
+	var checkoutCommand = &cobra.Command{
+		Use:   "checkout",
+		Short: "Display the logs of the commits",
+		Run: func(_ *cobra.Command, args []string) {
+			if len(args) > 1 {
+				log.Fatal("Invalid number of arguments")
+			}
+			checkout(args[0])
+		},
+	}
+
 	rootCmd.AddCommand(initCommand)
 	rootCmd.AddCommand(hashObjectCommand)
 	rootCmd.AddCommand(catFileCommand)
@@ -97,6 +108,7 @@ func main() {
 	rootCmd.AddCommand(readTreeCommand)
 	rootCmd.AddCommand(commitCommand)
 	rootCmd.AddCommand(logCommand)
+	rootCmd.AddCommand(checkoutCommand)
 	rootCmd.Execute()
 }
 
@@ -152,4 +164,8 @@ func goLog() {
 
 		oid = commit.parentOid
 	}
+}
+
+func checkout(oid string) {
+	Checkout(oid)
 }
