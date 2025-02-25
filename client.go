@@ -85,8 +85,8 @@ func main() {
 	var logCommand = &cobra.Command{
 		Use:   "log",
 		Short: "Display the logs of the commits",
-		Run: func(_ *cobra.Command, _ []string) {
-			goLog()
+		Run: func(_ *cobra.Command, args []string) {
+			goLog(args)
 		},
 	}
 
@@ -108,7 +108,7 @@ func main() {
 			if len(args) > 2 {
 				log.Fatal("Invalid number of arguments")
 			}
-			tag(args[0], args[1])
+			tag(args)
 		},
 	}
 
@@ -143,7 +143,8 @@ func hashObject(filepath string) {
 }
 
 func catFile(hashString string) {
-	data := GetObject(hashString, "")
+	oid := GetOID(hashString)
+	data := GetObject(oid, "")
 	_, err := os.Stdout.Write(data)
 	if err != nil {
 		log.Fatal(err)
@@ -155,18 +156,21 @@ func writeTree() {
 }
 
 func readTree(treeOid string) {
-	ReadTree(treeOid)
+	oid := GetOID(treeOid)
+	ReadTree(oid)
 }
 
 func commit(message string) {
 	fmt.Println(Commit(message))
 }
 
-func goLog() {
-	oid, err := GetRef("HEAD")
-	if err != nil {
-		log.Fatal(err)
+func goLog(args []string) {
+	ref := "HEAD"
+	if len(args) > 0 {
+		ref = args[0]
 	}
+
+	oid := GetOID(ref)
 
 	for oid != "" {
 		commit := GetCommit(oid)
@@ -182,16 +186,16 @@ func checkout(oid string) {
 	Checkout(oid)
 }
 
-func tag(name string, oidArg string) {
-	headOid, err := GetRef("HEAD")
-	if err != nil {
-		log.Fatal(err)
+func tag(args []string) {
+	var name, oidArg string
+	name = args[0]
+	if len(args) > 1 {
+		oidArg = args[1]
+	} else {
+		oidArg = "HEAD"
 	}
 
-	var oid string
-	if oidArg == "" {
-		oid = headOid
-	}
+	oid := GetOID(oidArg)
 
 	Tag(name, oid)
 }

@@ -23,6 +23,20 @@ type CommitDetails struct {
 	message   string
 }
 
+// GetOID returns either the OID or the named reference
+func GetOID(name string) string {
+	ref, err := GetRef(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if ref == "" {
+		return name
+	}
+
+	return ref
+}
+
 // WriteTree Write the current working directory into the object store
 func WriteTree(targetDir ...string) (oid string) {
 	directory := "."
