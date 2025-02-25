@@ -63,20 +63,22 @@ func GetObject(hash string, expectedTypeArg ...string) []byte {
 	return content
 }
 
-// SetHead Sets the HEAD to the latest Commit OID
-func SetHead(commitOid string) {
-	os.WriteFile(filepath.Join(GitDir, "HEAD"), []byte(commitOid), 0644)
+// UpdateRef Sets the HEAD to the latest Commit OID
+func UpdateRef(ref string, commitOid string) {
+	refPath := filepath.Join(GitDir, ref)
+	os.MkdirAll(filepath.Dir(refPath), 0755)
+	os.WriteFile(refPath, []byte(commitOid), 0644)
 }
 
-// GetHead Gets the contents of the HEAD file
-func GetHead() (string, error) {
-	headPath := filepath.Join(GitDir, "HEAD")
-	content, err := os.ReadFile(headPath)
+// GetRef Gets the contents of the HEAD file
+func GetRef(ref string) (string, error) {
+	refPath := filepath.Join(GitDir, ref)
+	content, err := os.ReadFile(refPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return "", nil
 		}
-		return "", fmt.Errorf("Failed to read HEAD file")
+		return "", fmt.Errorf("Failed to read ref")
 	}
 	return string(content), nil
 }

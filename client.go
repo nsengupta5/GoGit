@@ -92,12 +92,23 @@ func main() {
 
 	var checkoutCommand = &cobra.Command{
 		Use:   "checkout",
-		Short: "Display the logs of the commits",
+		Short: "Checkout to a specified commit",
 		Run: func(_ *cobra.Command, args []string) {
 			if len(args) > 1 {
 				log.Fatal("Invalid number of arguments")
 			}
 			checkout(args[0])
+		},
+	}
+
+	var tagCommand = &cobra.Command{
+		Use:   "tag",
+		Short: "Tag a specified commit with a specified name",
+		Run: func(_ *cobra.Command, args []string) {
+			if len(args) > 2 {
+				log.Fatal("Invalid number of arguments")
+			}
+			tag(args[0], args[1])
 		},
 	}
 
@@ -151,7 +162,7 @@ func commit(message string) {
 }
 
 func goLog() {
-	oid, err := GetHead()
+	oid, err := GetRef("HEAD")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -168,4 +179,18 @@ func goLog() {
 
 func checkout(oid string) {
 	Checkout(oid)
+}
+
+func tag(name string, oidArg string) {
+	headOid, err := GetRef("HEAD")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var oid string
+	if oidArg == "" {
+		oid = headOid
+	}
+
+	Tag(name, oid)
 }

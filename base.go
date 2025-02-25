@@ -92,7 +92,7 @@ func ReadTree(treeOid string, basePathArg ...string) {
 func Commit(message string) string {
 	var commitString string = fmt.Sprintf("tree %s\n", WriteTree())
 
-	HEAD, err := GetHead()
+	HEAD, err := GetRef("HEAD")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -144,7 +144,12 @@ func GetCommit(oid string) CommitDetails {
 func Checkout(oid string) {
 	commit := GetCommit(oid)
 	ReadTree(commit.treeOid)
-	SetHead(oid)
+	UpdateRef("HEAD", oid)
+}
+
+// Tag Tags a specified oid with a given name
+func Tag(name string, oid string) {
+	UpdateRef(filepath.Join("refs", "tags", name), oid)
 }
 
 func isIgnored(path string) bool {
