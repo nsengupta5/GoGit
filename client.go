@@ -143,9 +143,13 @@ func hashObject(filepath string) {
 }
 
 func catFile(hashString string) {
-	oid := GetOID(hashString)
+	oid, err := GetOID(hashString)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	data := GetObject(oid, "")
-	_, err := os.Stdout.Write(data)
+	_, err = os.Stdout.Write(data)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -156,7 +160,10 @@ func writeTree() {
 }
 
 func readTree(treeOid string) {
-	oid := GetOID(treeOid)
+	oid, err := GetOID(treeOid)
+	if err != nil {
+		log.Fatal(err)
+	}
 	ReadTree(oid)
 }
 
@@ -170,7 +177,10 @@ func goLog(args []string) {
 		ref = args[0]
 	}
 
-	oid := GetOID(ref)
+	oid, err := GetOID(ref)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for oid != "" {
 		commit := GetCommit(oid)
@@ -195,7 +205,10 @@ func tag(args []string) {
 		oidArg = "HEAD"
 	}
 
-	oid := GetOID(oidArg)
+	oid, err := GetOID(oidArg)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	Tag(name, oid)
 }

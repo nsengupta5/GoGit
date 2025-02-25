@@ -78,7 +78,7 @@ func GetRef(ref string) (string, error) {
 		if os.IsNotExist(err) {
 			return "", nil
 		}
-		return "", fmt.Errorf("Failed to read ref")
+		return "", fmt.Errorf("Failed to read ref: %s", err)
 	}
 	return string(content), nil
 }

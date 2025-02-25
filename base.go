@@ -6,6 +6,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -24,17 +25,31 @@ type CommitDetails struct {
 }
 
 // GetOID returns either the OID or the named reference
-func GetOID(name string) string {
-	ref, err := GetRef(name)
-	if err != nil {
-		log.Fatal(err)
+func GetOID(name string) (string, error) {
+	possibleRefs := []string{
+		name,
+		filepath.Join("refs", name),
+		filepath.Join("refs", "tags", name),
+		filepath.Join("refs", "heads", name),
 	}
 
-	if ref == "" {
-		return name
+	for _, refArg := range possibleRefs {
+		ref, err := GetRef(refArg)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if ref != "" {
+			return ref, nil
+		}
 	}
 
-	return ref
+	var validHexRegex = regexp.MustCompile("^[a-fA-F0-9]{64}$")
+	if validHexRegex.MatchString(name) {
+		return name, nil
+	}
+
+	return "", fmt.Errorf("Unknown name: %s", name)
 }
 
 // WriteTree Write the current working directory into the object store
